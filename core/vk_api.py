@@ -11,13 +11,14 @@ logger = logging.getLogger(LOGGER_NAME)
 
 
 def _check_vk_response(json: dict):
+    """Проверяет json ответ от VK API на присутствие сообщения об ошибке."""
     if "error" in json:
         error_code = json["error"]["error_code"]
         error_msg = json["error"]["error_msg"]
         raise HTTPError(f'Код ошибки: {error_code}, Сообщение ошибки: {error_msg}')
 
 
-class UploadedInfo(NamedTuple):
+class ImageUploadedInfo(NamedTuple):
     server: int
     photo: list[dict]
     hash: str
@@ -47,7 +48,7 @@ class VKApi:
         upload_url = json_answer["response"]["upload_url"]
         return upload_url
 
-    def upload_image(self, img_path: str) -> UploadedInfo:
+    def upload_image(self, img_path: str) -> ImageUploadedInfo:
         """Загрузка фото на сервер."""
         upload_url = self._get_upload_url()
 
@@ -62,10 +63,10 @@ class VKApi:
             response.raise_for_status()
 
         _check_vk_response(response.json())
-        z = response.json()
-        return UploadedInfo(server=z["server"], photo=z["photo"], hash=z["hash"])
+        resp_json = response.json()
+        return ImageUploadedInfo(server=resp_json["server"], photo=resp_json["photo"], hash=resp_json["hash"])
 
-    def save_image(self, info: UploadedInfo) -> tuple[str, str]:
+    def save_image(self, info: ImageUploadedInfo) -> tuple[str, str]:
         """Сохранение фото в альбоме группы."""
         url = urllib.parse.urljoin(VK_BASE_URL, "photos.saveWallPhoto")
 
