@@ -18,12 +18,6 @@ def _check_vk_response(json: dict):
         raise HTTPError(f'Код ошибки: {error_code}, Сообщение ошибки: {error_msg}')
 
 
-class ImageUploadedInfo(NamedTuple):
-    server: int
-    photo: list[dict]
-    hash: str
-
-
 def get_upload_url(token, api_version) -> str:
     """Получение адреса для загрузки фото."""
     url = urllib.parse.urljoin(VK_BASE_URL, "photos.getWallUploadServer")
@@ -42,8 +36,11 @@ def get_upload_url(token, api_version) -> str:
     return upload_url
 
 
-def upload_image(upload_url: str, api_version, img_path: str) -> ImageUploadedInfo:
-    """Загрузка фото на сервер."""
+def upload_image(upload_url: str, api_version, img_path: str) -> tuple[str, str, str]:
+    """Загрузка фото на сервер.
+
+    Возвращаемые значения имеют порядок: server, photo, hash
+    """
     with open(img_path, 'rb') as f:
         params = {
             "v": api_version,
@@ -56,10 +53,10 @@ def upload_image(upload_url: str, api_version, img_path: str) -> ImageUploadedIn
 
     _check_vk_response(response.json())
     resp_json = response.json()
-    return ImageUploadedInfo(server=resp_json["server"], photo=resp_json["photo"], hash=resp_json["hash"])
+    return resp_json["server"], resp_json["photo"], resp_json["hash"]
 
 
-def save_image(token, api_version, info: ImageUploadedInfo) -> tuple[str, str]:
+def save_image(token, api_version, server, photo, hash_) -> tuple[str, str]:
     """Сохранение фото в альбоме группы."""
     url = urllib.parse.urljoin(VK_BASE_URL, "photos.saveWallPhoto")
 
@@ -67,9 +64,9 @@ def save_image(token, api_version, info: ImageUploadedInfo) -> tuple[str, str]:
         "access_token": token,
         "v": api_version,
 
-        "server": info.server,
-        "photo": info.photo,
-        "hash": info.hash,
+        "server": server,
+        "photo": photo,
+        "hash": hash_,
     }
 
     response = requests.post(url, params=params)

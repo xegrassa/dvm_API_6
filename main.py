@@ -45,9 +45,15 @@ def main():
         download_image(image_link, file_path)
 
         upload_url = vk.get_upload_url(token=vk_access_token, api_version=VK_API_VERSION)
-        info = vk.upload_image(api_version=VK_API_VERSION, img_path=file_path, upload_url=upload_url)
+        server, photo, hash_ = vk.upload_image(api_version=VK_API_VERSION, img_path=file_path, upload_url=upload_url)
 
-        owner_id, media_id = vk.save_image(token=vk_access_token, api_version=VK_API_VERSION, info=info)
+        owner_id, media_id = vk.save_image(
+            token=vk_access_token,
+            api_version=VK_API_VERSION,
+            server=server,
+            photo=photo,
+            hash_=hash_
+        )
 
         vk.publish_record(
             token=vk_access_token,
