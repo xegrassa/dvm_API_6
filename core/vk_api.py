@@ -10,11 +10,11 @@ from core.constant import LOGGER_NAME, VK_BASE_URL
 logger = logging.getLogger(LOGGER_NAME)
 
 
-def _check_vk_response(json: dict):
-    """Проверяет json ответ от VK API на присутствие сообщения об ошибке."""
-    if "error" in json:
-        error_code = json["error"]["error_code"]
-        error_msg = json["error"]["error_msg"]
+def _check_vk_response(vk_response: dict):
+    """Проверяет декодированный json ответ от VK API на присутствие сообщения об ошибке."""
+    if "error" in vk_response:
+        error_code = vk_response["error"]["error_code"]
+        error_msg = vk_response["error"]["error_msg"]
         raise HTTPError(f'Код ошибки: {error_code}, Сообщение ошибки: {error_msg}')
 
 

@@ -14,8 +14,11 @@ from core.helpers import check_allow_log_level, configure_logger, download_image
 logger = logging.getLogger(LOGGER_NAME)
 
 
-def get_random_link_and_msg() -> tuple[str, str]:
-    """Возвращает ссылку для скачивания комикса и комментарий автора."""
+def download_random_comics(dir_path: str) -> tuple[str, str]:
+    """Скачивает рандомный комикс с сайта https://xkcd.com/.
+
+    Возвращает путь до скачанного комикса и комментарий автора.
+    """
     url = urllib.parse.urljoin(XKCD_BASE_URL, "info.0.json")
     response = requests.get(url)
     response.raise_for_status()
@@ -29,7 +32,11 @@ def get_random_link_and_msg() -> tuple[str, str]:
     response.raise_for_status()
 
     comics = response.json()
-    return comics['img'], comics['alt']
+
+    file_path = os.path.join(dir_path, "temp.png")
+    download_image(comics['img'], file_path)
+
+    return file_path, comics['alt']
 
 
 def main():
@@ -40,12 +47,10 @@ def main():
     vk_club_id = os.getenv("VK_CLUB_ID")
 
     with TemporaryDirectory() as tmp_dir:
-        file_path = os.path.join(tmp_dir, "temp.png")
-        image_link, image_alt_msg = get_random_link_and_msg()
-        download_image(image_link, file_path)
+        image_path, image_alt = download_random_comics(tmp_dir)
 
         upload_url = vk.get_upload_url(token=vk_access_token, api_version=VK_API_VERSION)
-        server, photo, hash_ = vk.upload_image(api_version=VK_API_VERSION, img_path=file_path, upload_url=upload_url)
+        server, photo, hash_ = vk.upload_image(api_version=VK_API_VERSION, img_path=image_path, upload_url=upload_url)
 
         owner_id, media_id = vk.save_image(
             token=vk_access_token,
@@ -59,7 +64,7 @@ def main():
             token=vk_access_token,
             api_version=VK_API_VERSION,
             club_id=int(vk_club_id),
-            msg=image_alt_msg,
+            msg=image_alt,
             owner_id=owner_id,
             media_id=media_id
         )
