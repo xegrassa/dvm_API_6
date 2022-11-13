@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 import requests
 from dotenv import load_dotenv
 
-from core.vk_api import VKApi
+import core.vk_api as vk
 from core.constant import LOGGER_NAME, XKCD_BASE_URL, VK_API_VERSION
 from core.helpers import check_allow_log_level, configure_logger, download_image
 
@@ -39,17 +39,24 @@ def main():
     vk_access_token = os.getenv("VK_ACCESS_TOKEN")
     vk_club_id = os.getenv("VK_CLUB_ID")
 
-    vk_api = VKApi(token=vk_access_token, api_version=VK_API_VERSION, club_id=int(vk_club_id))
-
     with TemporaryDirectory() as tmp_dir:
         file_path = os.path.join(tmp_dir, "temp.png")
         image_link, image_alt_msg = get_random_link_and_msg()
         download_image(image_link, file_path)
 
-        info = vk_api.upload_image(img_path=file_path)
+        upload_url = vk.get_upload_url(token=vk_access_token, api_version=VK_API_VERSION)
+        info = vk.upload_image(api_version=VK_API_VERSION, img_path=file_path, upload_url=upload_url)
 
-        owner_id, media_id = vk_api.save_image(info)
-        vk_api.publish_record(msg=image_alt_msg, owner_id=owner_id, media_id=media_id)
+        owner_id, media_id = vk.save_image(token=vk_access_token, api_version=VK_API_VERSION, info=info)
+
+        vk.publish_record(
+            token=vk_access_token,
+            api_version=VK_API_VERSION,
+            club_id=int(vk_club_id),
+            msg=image_alt_msg,
+            owner_id=owner_id,
+            media_id=media_id
+        )
 
 
 if __name__ == '__main__':
