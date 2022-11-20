@@ -42,14 +42,16 @@ def upload_image(upload_url: str, api_version, img_path: str) -> tuple[str, str,
     Возвращаемые значения имеют порядок: server, photo, hash
     """
     with open(img_path, 'rb') as f:
-        params = {
-            "v": api_version,
-        }
         files = {
-            'photo': f,
+            'photo': (f.name, f.read())
         }
-        response = requests.post(upload_url, params=params, files=files)
-        response.raise_for_status()
+
+    params = {
+        "v": api_version,
+    }
+
+    response = requests.post(upload_url, params=params, files=files)
+    response.raise_for_status()
 
     _check_vk_response(response.json())
     resp_json = response.json()
