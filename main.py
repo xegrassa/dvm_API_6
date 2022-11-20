@@ -30,7 +30,6 @@ def download_random_comics(dir_path: str) -> tuple[str, str]:
     url = urllib.parse.urljoin(XKCD_BASE_URL, f"{comics_num}/info.0.json")
     response = requests.get(url)
     response.raise_for_status()
-
     comics = response.json()
 
     file_path = os.path.join(dir_path, "temp.png")

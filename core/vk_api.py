@@ -28,11 +28,11 @@ def get_upload_url(token, api_version) -> str:
 
     response = requests.get(url, params=params)
     response.raise_for_status()
-    json_answer = response.json()
+    upload_url_response = response.json()
 
-    _check_vk_response(json_answer)
+    _check_vk_response(upload_url_response)
 
-    upload_url = json_answer["response"]["upload_url"]
+    upload_url = upload_url_response["response"]["upload_url"]
     return upload_url
 
 
@@ -53,9 +53,9 @@ def upload_image(upload_url: str, api_version, img_path: str) -> tuple[str, str,
     response = requests.post(upload_url, params=params, files=files)
     response.raise_for_status()
 
-    resp_json = response.json()
-    _check_vk_response(resp_json)
-    return resp_json["server"], resp_json["photo"], resp_json["hash"]
+    upload_response = response.json()
+    _check_vk_response(upload_response)
+    return upload_response["server"], upload_response["photo"], upload_response["hash"]
 
 
 def save_image(token, api_version, server, photo, hash_) -> tuple[str, str]:
@@ -74,11 +74,11 @@ def save_image(token, api_version, server, photo, hash_) -> tuple[str, str]:
     response = requests.post(url, params=params)
     response.raise_for_status()
 
-    resp_json = response.json()
-    _check_vk_response(resp_json)
+    image_response = response.json()
+    _check_vk_response(image_response)
 
-    owner_id = resp_json["response"][0]["owner_id"]
-    media_id = resp_json["response"][0]["id"]
+    owner_id = image_response["response"][0]["owner_id"]
+    media_id = image_response["response"][0]["id"]
     return owner_id, media_id
 
 
