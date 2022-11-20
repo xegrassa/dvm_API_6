@@ -82,7 +82,7 @@ def save_image(token, api_version, server, photo, hash_) -> tuple[str, str]:
     return owner_id, media_id
 
 
-def publish_record(token: str, api_version: str, club_id: int, msg: str, owner_id: str, media_id: str) -> None:
+def publish_record(token: str, api_version: str, club_id: str, msg: str, owner_id: str, media_id: str) -> None:
     """Публикация записи в группе."""
     url = urllib.parse.urljoin(VK_BASE_URL, "wall.post")
 
@@ -91,7 +91,7 @@ def publish_record(token: str, api_version: str, club_id: int, msg: str, owner_i
         "v": api_version,
 
         "message": msg,
-        "owner_id": -club_id,
+        "owner_id": f"-{club_id}",
         "from_group": "",
         "attachments": f"photo{owner_id}_{media_id}",
     }

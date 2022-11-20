@@ -63,7 +63,7 @@ def main():
         vk.publish_record(
             token=vk_access_token,
             api_version=VK_API_VERSION,
-            club_id=int(vk_club_id),
+            club_id=vk_club_id,
             msg=image_alt,
             owner_id=owner_id,
             media_id=media_id
